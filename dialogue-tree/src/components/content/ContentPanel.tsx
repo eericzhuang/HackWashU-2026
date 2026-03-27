@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import type { Session, TreeNode, DivergeState } from '@/types';
 import { NodeContent } from '@/components/content/NodeContent';
@@ -52,6 +52,39 @@ export function ContentPanel({
     },
     [onSelectCard]
   );
+
+  // Vertical split resizer (used only in default view with cards)
+  const [splitRatio, setSplitRatio] = useState(0.55);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const vDragging = useRef(false);
+
+  const handleVDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    vDragging.current = true;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!vDragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const ratio = (e.clientY - rect.top) / rect.height;
+      setSplitRatio(Math.min(0.7, Math.max(0.3, ratio)));
+    };
+    const onUp = () => {
+      if (!vDragging.current) return;
+      vDragging.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, []);
 
   const isIdle = divergeState.phase === 'idle' && !divergeState.isRunning;
 
@@ -115,39 +148,49 @@ export function ContentPanel({
     );
   }
 
-  // ===== Default view: NodeContent stretched on top + compact cards below =====
+  // ===== Default view: NodeContent on top + resizable cards below =====
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* Top: current node content (fills most of the space) */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+    <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
+      {/* Top: current node content */}
+      <div className="min-h-0 overflow-hidden" style={{ flex: `0 0 ${splitRatio * 100}%` }}>
         <NodeContent node={activeNode} />
       </div>
 
-      {/* Context summary (collapsible) */}
-      {showContext && activeNode.context && (
-        <div className="shrink-0 mx-6 mt-2 rounded-lg border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
-          <p className="font-medium mb-1">Context Summary</p>
-          <p>{activeNode.context}</p>
-        </div>
-      )}
+      {/* Vertical drag handle */}
+      <div
+        onMouseDown={handleVDragStart}
+        className="shrink-0 h-1 cursor-row-resize bg-border hover:bg-primary/40 transition-colors"
+      />
 
-      {/* Bottom: 2x2 candidate cards (compact fixed height) */}
-      <div className="shrink-0 px-6 pt-4 pb-2">
-        <div className="grid grid-cols-2 gap-3">
-          {divergeState.cards.map((card) => (
-            <CandidateCard
-              key={card.index}
-              card={card}
-              onSelect={onSelectCard}
-              onExpand={handleExpand}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Bottom: scrollable cards + context + action bar */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        {/* Context summary (collapsible) */}
+        {showContext && activeNode.context && (
+          <div className="shrink-0 mx-6 mt-2 rounded-lg border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+            <p className="font-medium mb-1">Context Summary</p>
+            <p>{activeNode.context}</p>
+          </div>
+        )}
 
-      {/* Action bar */}
-      <div className="shrink-0 px-6 py-2 border-t border-border flex items-center gap-2">
-        {divergeState.isRunning ? (
+        {/* Candidate cards — scrollable */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="px-6 pt-4 pb-2">
+            <div className="grid grid-cols-2 gap-3">
+              {divergeState.cards.map((card) => (
+                <CandidateCard
+                  key={card.index}
+                  card={card}
+                  onSelect={onSelectCard}
+                  onExpand={handleExpand}
+                />
+              ))}
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Action bar */}
+        <div className="shrink-0 px-6 py-2 border-t border-border flex items-center gap-2">
+          {divergeState.isRunning ? (
           <Button variant="ghost" size="sm" onClick={onCancel}>
             <X className="w-4 h-4 mr-1" />
             Cancel
@@ -198,11 +241,12 @@ export function ContentPanel({
           </>
         )}
 
-        {divergeState.phase === 'error' && divergeState.error && (
-          <span className="text-destructive text-xs ml-auto">
-            {divergeState.error}
-          </span>
-        )}
+          {divergeState.phase === 'error' && divergeState.error && (
+            <span className="text-destructive text-xs ml-auto">
+              {divergeState.error}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

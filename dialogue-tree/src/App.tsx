@@ -42,17 +42,14 @@ function App() {
     }
   }, [question, diverge]);
 
-  // Select card → set activeNode → trigger new diverge round
+  // Select card → set activeNode → show full response (user decides to diverge)
   const handleSelectCard = useCallback(
     async (finalNodeId: string) => {
       if (!liveSession) return;
       await setActiveNode(liveSession.id, finalNodeId);
-      const node = await db.nodes.get(finalNodeId);
-      if (node) {
-        diverge(liveSession, node);
-      }
+      reset();
     },
-    [liveSession, diverge]
+    [liveSession, reset]
   );
 
   // Diverge from current node
