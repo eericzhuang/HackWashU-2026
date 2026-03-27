@@ -194,11 +194,12 @@ export async function generateAngles(
   skill: string,
   context: string,
   currentContent: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  guidance?: string
 ): Promise<AnglesResponse> {
   const text = await sendMessage(
     anglesSystemPrompt(skill),
-    anglesUserPrompt(context, currentContent),
+    anglesUserPrompt(context, currentContent, guidance),
     signal
   );
 
@@ -208,7 +209,7 @@ export async function generateAngles(
     // Retry once
     const retry = await sendMessage(
       anglesSystemPrompt(skill),
-      anglesUserPrompt(context, currentContent),
+      anglesUserPrompt(context, currentContent, guidance),
       signal
     );
     return JSON.parse(extractJSON(retry)) as AnglesResponse;
@@ -221,11 +222,12 @@ export async function generateResponse(
   currentContent: string,
   angle: Angle,
   callbacks: StreamCallbacks,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  guidance?: string
 ): Promise<void> {
   await streamMessage(
     responseSystemPrompt(skill),
-    responseUserPrompt(context, currentContent, angle),
+    responseUserPrompt(context, currentContent, angle, guidance),
     callbacks,
     signal
   );

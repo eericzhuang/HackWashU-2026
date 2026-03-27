@@ -60,9 +60,9 @@ export function ExplorationPage() {
     [session, reset, loadExisting]
   );
 
-  const handleDiverge = useCallback(async () => {
+  const handleDiverge = useCallback(async (guidance?: string) => {
     if (!session || !activeNode) return;
-    diverge(session, activeNode);
+    diverge(session, activeNode, guidance);
   }, [session, activeNode, diverge]);
 
   const handleReDiverge = useCallback(async () => {

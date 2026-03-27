@@ -13,11 +13,15 @@ Requirements:
 
 export function anglesUserPrompt(
   context: string,
-  currentContent: string
+  currentContent: string,
+  guidance?: string
 ): string {
+  const guidanceLine = guidance
+    ? `\n\nUser guidance for this divergence: ${guidance}`
+    : '';
   return `Context summary: ${context || '(This is the initial question, no context yet)'}
 
-Current content: ${currentContent}
+Current content: ${currentContent}${guidanceLine}
 
 Generate 4 divergent directions. Return format:
 {"angles":[{"name":"Angle Name","rationale":"Why this is valuable"}]}`;
@@ -43,11 +47,15 @@ Requirements:
 export function responseUserPrompt(
   context: string,
   currentContent: string,
-  angle: { name: string; rationale: string }
+  angle: { name: string; rationale: string },
+  guidance?: string
 ): string {
+  const guidanceLine = guidance
+    ? `\n\nUser guidance: ${guidance}`
+    : '';
   return `Background context: ${context || '(Initial question)'}
 
-Current discussion: ${currentContent}
+Current discussion: ${currentContent}${guidanceLine}
 
 Explore in depth from the "${angle.name}" angle: ${angle.rationale}`;
 }

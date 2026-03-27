@@ -39,7 +39,7 @@ export function useDiverge() {
   );
 
   const diverge = useCallback(
-    async (session: Session, currentNode: TreeNode) => {
+    async (session: Session, currentNode: TreeNode, guidance?: string) => {
       // 0. Initialize
       abortRef.current?.abort();
       abortRef.current = new AbortController();
@@ -78,7 +78,8 @@ export function useDiverge() {
           session.skill,
           currentNode.context,
           currentContent,
-          signal
+          signal,
+          guidance
         );
 
         const [context, anglesResult] = await Promise.all([
@@ -136,7 +137,8 @@ export function useDiverge() {
                 });
               },
             },
-            signal
+            signal,
+            guidance
           )
         );
 

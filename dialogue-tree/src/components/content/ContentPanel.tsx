@@ -6,7 +6,8 @@ import { CandidateCard } from '@/components/content/CandidateCard';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork, ChevronDown, ChevronRight } from 'lucide-react';
 
 const EXPAND_COLORS = [
   { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', badge: 'bg-blue-500/20 text-blue-400' },
@@ -20,7 +21,7 @@ interface ContentPanelProps {
   activeNode: TreeNode;
   divergeState: DivergeState;
   onSelectCard: (finalNodeId: string) => void;
-  onDiverge: () => void;
+  onDiverge: (guidance?: string) => void;
   onReDiverge: () => void;
   onCancel: () => void;
 }
@@ -36,6 +37,8 @@ export function ContentPanel({
   const [showContext, setShowContext] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [showReDivergeConfirm, setShowReDivergeConfirm] = useState(false);
+  const [showGuidance, setShowGuidance] = useState(false);
+  const [guidance, setGuidance] = useState('');
 
   const handleExpand = useCallback((index: number) => {
     setExpandedIndex(index);
@@ -138,11 +141,38 @@ export function ContentPanel({
         <div className="flex-1 min-h-0 overflow-hidden">
           <NodeContent node={activeNode} />
         </div>
-        <div className="shrink-0 px-6 py-4 border-t border-border flex items-center justify-center">
-          <Button onClick={onDiverge} size="sm" className="gap-1.5 shadow-sm hover:shadow-md transition-shadow">
-            <GitFork className="w-4 h-4" />
-            Diverge from here
-          </Button>
+        <div className="shrink-0 border-t border-border px-6 py-3 space-y-2">
+          <button
+            type="button"
+            onClick={() => setShowGuidance((v) => !v)}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showGuidance ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            Steer this divergence (optional)
+          </button>
+          {showGuidance && (
+            <Textarea
+              placeholder="e.g. Focus on practical applications, or Challenge this assumption..."
+              value={guidance}
+              onChange={(e) => setGuidance(e.target.value)}
+              className="min-h-[60px] text-sm"
+            />
+          )}
+          <div className="flex items-center justify-center pt-1">
+            <Button
+              onClick={() => {
+                const g = guidance.trim() || undefined;
+                setGuidance('');
+                setShowGuidance(false);
+                onDiverge(g);
+              }}
+              size="sm"
+              className="gap-1.5 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <GitFork className="w-4 h-4" />
+              Diverge from here
+            </Button>
+          </div>
         </div>
       </div>
     );
