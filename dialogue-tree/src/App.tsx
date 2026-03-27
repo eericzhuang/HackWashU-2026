@@ -29,7 +29,7 @@ function App() {
     (n) => n.id === (liveSession?.activeNodeId ?? session?.activeNodeId)
   );
 
-  const { state: divergeState, diverge, cancel, loadExisting } = useDiverge();
+  const { state: divergeState, diverge, cancel, loadExisting, reset } = useDiverge();
 
   // Create session and auto-trigger the first diverge
   const handleStart = useCallback(async () => {
@@ -55,6 +55,12 @@ function App() {
     [liveSession, diverge]
   );
 
+  // Diverge from current node
+  const handleDiverge = useCallback(async () => {
+    if (!liveSession || !activeNode) return;
+    diverge(liveSession, activeNode);
+  }, [liveSession, activeNode, diverge]);
+
   // Re-diverge: delete existing children, regenerate
   const handleReDiverge = useCallback(async () => {
     if (!liveSession || !activeNode) return;
@@ -74,7 +80,8 @@ function App() {
 
       const children = await getChildren(liveSession.id, nodeId);
       if (children.length === 0) {
-        diverge(liveSession, node);
+        // Leaf node — just show content, don't auto-diverge
+        reset();
       } else {
         // Load existing children as completed cards
         loadExisting(children);
@@ -133,6 +140,7 @@ function App() {
         activeNode={activeNode}
         divergeState={divergeState}
         onSelectCard={handleSelectCard}
+        onDiverge={handleDiverge}
         onReDiverge={handleReDiverge}
         onCancel={cancel}
       />

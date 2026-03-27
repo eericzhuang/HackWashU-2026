@@ -6,7 +6,7 @@ import { CandidateCard } from '@/components/content/CandidateCard';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { RotateCcw, X, Eye, ArrowLeft, Check } from 'lucide-react';
+import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork } from 'lucide-react';
 
 const EXPAND_COLORS = [
   { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', badge: 'bg-blue-500/20 text-blue-400' },
@@ -20,6 +20,7 @@ interface ContentPanelProps {
   activeNode: TreeNode;
   divergeState: DivergeState;
   onSelectCard: (finalNodeId: string) => void;
+  onDiverge: () => void;
   onReDiverge: () => void;
   onCancel: () => void;
 }
@@ -28,6 +29,7 @@ export function ContentPanel({
   activeNode,
   divergeState,
   onSelectCard,
+  onDiverge,
   onReDiverge,
   onCancel,
 }: ContentPanelProps) {
@@ -50,6 +52,8 @@ export function ContentPanel({
     },
     [onSelectCard]
   );
+
+  const isIdle = divergeState.phase === 'idle' && !divergeState.isRunning;
 
   // ===== Expanded response detail view =====
   if (expandedIndex !== null) {
@@ -90,6 +94,23 @@ export function ContentPanel({
             </div>
           </article>
         </ScrollArea>
+      </div>
+    );
+  }
+
+  // ===== Idle view: full response + Diverge button (leaf node) =====
+  if (isIdle) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <NodeContent node={activeNode} />
+        </div>
+        <div className="shrink-0 px-6 py-3 border-t border-border flex items-center justify-center">
+          <Button onClick={onDiverge} size="sm">
+            <GitFork className="w-4 h-4 mr-1" />
+            Diverge from here
+          </Button>
+        </div>
       </div>
     );
   }

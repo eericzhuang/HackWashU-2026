@@ -178,10 +178,15 @@ export function useDiverge() {
     []
   );
 
+  const reset = useCallback(() => {
+    abortRef.current?.abort();
+    setState(initialState);
+  }, []);
+
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     setState((prev) => ({ ...prev, isRunning: false, phase: 'idle' }));
   }, []);
 
-  return { state, diverge, cancel, loadExisting };
+  return { state, diverge, cancel, loadExisting, reset };
 }
