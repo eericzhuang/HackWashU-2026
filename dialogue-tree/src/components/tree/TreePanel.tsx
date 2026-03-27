@@ -45,13 +45,14 @@ function TreePanelInner({ session, allNodes, activeNodeId, onNodeClick }: TreePa
   const [skillDraft, setSkillDraft] = useState(session.skill);
   const { theme, toggleTheme } = useTheme();
 
+  // Only fitView when the tree grows (new nodes added), not on every node click
   useEffect(() => {
     if (nodes.length === 0) return;
     const timer = setTimeout(() => {
       fitView({ padding: 0.3, duration: 300 });
     }, 50);
     return () => clearTimeout(timer);
-  }, [nodes.length, activeNodeId, fitView]);
+  }, [nodes.length, fitView]);
 
   useEffect(() => {
     prevActiveRef.current = activeNodeId;
