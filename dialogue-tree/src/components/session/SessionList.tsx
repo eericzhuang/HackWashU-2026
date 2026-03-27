@@ -35,7 +35,7 @@ export function SessionList() {
   return (
     <div className="h-screen min-w-[900px] bg-background flex flex-col">
       {/* Top bar */}
-      <div className="shrink-0 px-6 py-4 border-b border-border flex items-center justify-between">
+      <div className="shrink-0 px-6 py-4 border-b border-border bg-card/80 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
             <GitFork className="w-4 h-4 text-primary" />
@@ -74,7 +74,7 @@ export function SessionList() {
             {sessions.map((session) => (
               <Card
                 key={session.id}
-                className="p-4 cursor-pointer hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 transition-all duration-200 group"
+                className="p-4 bg-card cursor-pointer hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 group"
                 onClick={() => navigate(`/session/${session.id}`)}
               >
                 <div className="flex items-start justify-between gap-3">

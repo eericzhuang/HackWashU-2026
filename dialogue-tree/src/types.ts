@@ -70,4 +70,5 @@ export interface DivergeState {
   phase: 'idle' | 'preparing' | 'angles' | 'responses' | 'done' | 'error';
   cards: CandidateCardState[];    // Fixed 4 cards
   error: string | null;
+  parentNodeId: string | null;    // Which node this diverge is running for
 }

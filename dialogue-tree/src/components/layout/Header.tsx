@@ -29,7 +29,7 @@ export function Header({ session }: HeaderProps) {
 
   return (
     <>
-      <div className="shrink-0 h-11 px-4 border-b border-border flex items-center justify-between bg-card/50">
+      <div className="shrink-0 h-11 px-4 border-b border-border flex items-center justify-between bg-card/80">
         <div className="flex items-center gap-2 min-w-0">
           <Button variant="ghost" size="icon-sm" onClick={() => navigate('/')}>
             <ArrowLeft className="w-4 h-4" />

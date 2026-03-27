@@ -7,32 +7,40 @@ import { Loader2 } from 'lucide-react';
 
 const CARD_COLORS = [
   {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-600 dark:text-blue-400',
-    border: 'border-blue-500/30',
-    badge: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20',
-    hoverBorder: 'hover:border-blue-500/60',
+    bg: 'bg-blue-500/8',
+    text: 'text-blue-500 dark:text-blue-400',
+    border: 'border-blue-400/20',
+    badge: 'bg-blue-500/12 text-blue-500 dark:text-blue-400 hover:bg-blue-500/12',
+    hoverBorder: 'hover:border-blue-400/50',
+    leftBar: 'border-l-blue-400/60',
+    hoverGlow: 'hover:shadow-blue-500/8',
   },
   {
-    bg: 'bg-green-500/10',
+    bg: 'bg-green-500/8',
     text: 'text-green-600 dark:text-green-400',
-    border: 'border-green-500/30',
-    badge: 'bg-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20',
-    hoverBorder: 'hover:border-green-500/60',
+    border: 'border-green-400/20',
+    badge: 'bg-green-500/12 text-green-600 dark:text-green-400 hover:bg-green-500/12',
+    hoverBorder: 'hover:border-green-400/50',
+    leftBar: 'border-l-green-400/60',
+    hoverGlow: 'hover:shadow-green-500/8',
   },
   {
-    bg: 'bg-orange-500/10',
+    bg: 'bg-orange-500/8',
     text: 'text-orange-600 dark:text-orange-400',
-    border: 'border-orange-500/30',
-    badge: 'bg-orange-500/20 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20',
-    hoverBorder: 'hover:border-orange-500/60',
+    border: 'border-orange-400/20',
+    badge: 'bg-orange-500/12 text-orange-600 dark:text-orange-400 hover:bg-orange-500/12',
+    hoverBorder: 'hover:border-orange-400/50',
+    leftBar: 'border-l-orange-400/60',
+    hoverGlow: 'hover:shadow-orange-500/8',
   },
   {
-    bg: 'bg-purple-500/10',
-    text: 'text-purple-600 dark:text-purple-400',
-    border: 'border-purple-500/30',
-    badge: 'bg-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20',
-    hoverBorder: 'hover:border-purple-500/60',
+    bg: 'bg-purple-500/8',
+    text: 'text-purple-500 dark:text-purple-400',
+    border: 'border-purple-400/20',
+    badge: 'bg-purple-500/12 text-purple-500 dark:text-purple-400 hover:bg-purple-500/12',
+    hoverBorder: 'hover:border-purple-400/50',
+    leftBar: 'border-l-purple-400/60',
+    hoverGlow: 'hover:shadow-purple-500/8',
   },
 ] as const;
 
@@ -40,13 +48,11 @@ const STAGGER_DELAYS = ['0ms', '75ms', '150ms', '225ms'] as const;
 
 interface CandidateCardProps {
   card: CandidateCardState;
-  onSelect: (finalNodeId: string) => void;
   onExpand: (index: number) => void;
 }
 
 export const CandidateCard = memo(function CandidateCard({
   card,
-  onSelect,
   onExpand,
 }: CandidateCardProps) {
   const colors = CARD_COLORS[card.index];
@@ -93,7 +99,7 @@ export const CandidateCard = memo(function CandidateCard({
     <Card
       className={`${colors.border} ${colors.bg} border p-5 flex flex-col justify-center transition-all duration-200 animate-card-in ${
         isClickable
-          ? `cursor-pointer ${colors.hoverBorder} hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5`
+          ? `cursor-pointer border-l-2 ${colors.leftBar} ${colors.hoverBorder} ${colors.hoverGlow} hover:shadow-lg hover:-translate-y-0.5`
           : ''
       }`}
       style={{ animationDelay: delay }}

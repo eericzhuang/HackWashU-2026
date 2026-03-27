@@ -72,9 +72,9 @@ function TreePanelInner({ session, allNodes, activeNodeId, onNodeClick }: TreePa
   const path = getAncestorPath(allNodes, activeNodeId);
 
   return (
-    <div className="h-full flex flex-col bg-card/50 border-r border-border">
+    <div className="h-full flex flex-col bg-sidebar border-r border-border">
       {/* Top bar: back + title + settings */}
-      <div className="shrink-0 px-2 py-1.5 border-b border-border flex items-center gap-1">
+      <div className="shrink-0 px-2 py-1.5 border-b border-border bg-card/80 flex items-center gap-1">
         <Button variant="ghost" size="icon-sm" onClick={() => navigate('/')}>
           <ArrowLeft className="w-3.5 h-3.5" />
         </Button>

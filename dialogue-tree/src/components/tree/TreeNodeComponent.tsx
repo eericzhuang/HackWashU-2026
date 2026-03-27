@@ -10,18 +10,18 @@ export const TreeNodeComponent = memo(function TreeNodeComponent({
   const { label, preview, isActive, isAncestor, depth } = data;
 
   let borderClass = 'border-border';
-  let bgClass = 'bg-foreground/5';
+  let bgClass = 'bg-foreground/5 dark:bg-background/80';
   let textClass = 'text-muted-foreground';
   let shadow = '';
 
   if (isActive) {
     borderClass = 'border-blue-500/60';
-    bgClass = 'bg-blue-500/15';
+    bgClass = 'bg-blue-500/15 dark:bg-blue-500/20';
     textClass = 'text-foreground';
     shadow = 'shadow-md shadow-blue-500/10';
   } else if (isAncestor) {
     borderClass = 'border-foreground/20';
-    bgClass = 'bg-foreground/8';
+    bgClass = 'bg-foreground/8 dark:bg-background/60';
     textClass = 'text-foreground/80';
   }
 

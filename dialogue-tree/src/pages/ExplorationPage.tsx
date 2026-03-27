@@ -1,11 +1,24 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, setActiveNode, getChildren, deleteChildren } from '@/lib/db';
+import type { DivergeState, CandidateCardState } from '@/types';
+import { db, setActiveNode, deleteChildren } from '@/lib/db';
 import { useDiverge } from '@/hooks/useDiverge';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import { AppShell } from '@/components/layout/AppShell';
 import { ContentPanel } from '@/components/content/ContentPanel';
+
+function emptyCard(index: number): CandidateCardState {
+  return { index, status: 'empty', angle: null, streamedText: '', finalNodeId: null, error: null };
+}
+
+const idleState: DivergeState = {
+  isRunning: false,
+  phase: 'idle',
+  cards: [0, 1, 2, 3].map(emptyCard),
+  error: null,
+  parentNodeId: null,
+};
 
 export function ExplorationPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -25,7 +38,31 @@ export function ExplorationPage() {
     (n) => n.id === session?.activeNodeId
   );
 
-  const { state: divergeState, diverge, cancel, loadExisting, reset } = useDiverge();
+  const { state: divergeState, diverge, cancel } = useDiverge();
+
+  // Compute the effective display state:
+  // - If the diverge is for the current active node → show live diverge state
+  // - Otherwise → compute from DB children (done with cards, or idle)
+  const displayState: DivergeState = useMemo(() => {
+    if (!activeNode || !allNodes) return idleState;
+    if (divergeState.parentNodeId === activeNode.id) return divergeState;
+    // Not diverging for this node — check DB children
+    const children = allNodes.filter((n) => n.parentId === activeNode.id);
+    if (children.length === 0) return idleState;
+    const cards: CandidateCardState[] = [0, 1, 2, 3].map((i) => {
+      const child = children[i];
+      if (!child) return emptyCard(i);
+      return {
+        index: i,
+        status: 'complete' as const,
+        angle: { name: child.angle ?? '', rationale: child.rationale ?? '' },
+        streamedText: child.response ?? '',
+        finalNodeId: child.id,
+        error: null,
+      };
+    });
+    return { isRunning: false, phase: 'done', cards, error: null, parentNodeId: activeNode.id };
+  }, [activeNode, allNodes, divergeState]);
 
   // Auto-diverge on first visit if root has no children
   useEffect(() => {
@@ -35,12 +72,6 @@ export function ExplorationPage() {
     const children = allNodes.filter((n) => n.parentId === root.id);
     if (children.length === 0 && divergeState.phase === 'idle' && !divergeState.isRunning) {
       diverge(session, root);
-    } else if (children.length > 0 && divergeState.phase === 'idle' && !divergeState.isRunning) {
-      // Load existing children for the active node
-      const activeChildren = allNodes.filter((n) => n.parentId === session.activeNodeId);
-      if (activeChildren.length > 0) {
-        loadExisting(activeChildren);
-      }
     }
     // Only run on initial load
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,14 +81,9 @@ export function ExplorationPage() {
     async (finalNodeId: string) => {
       if (!session) return;
       await setActiveNode(session.id, finalNodeId);
-      const children = await getChildren(session.id, finalNodeId);
-      if (children.length > 0) {
-        loadExisting(children);
-      } else {
-        reset();
-      }
+      // displayState will recompute from allNodes — no need to call loadExisting/reset
     },
-    [session, reset, loadExisting]
+    [session]
   );
 
   const handleDiverge = useCallback(async (guidance?: string) => {
@@ -75,39 +101,31 @@ export function ExplorationPage() {
     async (nodeId: string) => {
       if (!session) return;
       if (nodeId === activeNode?.id) return;
-
+      // Just change active node — don't cancel any running diverge.
+      // displayState will recompute based on the new active node.
       await setActiveNode(session.id, nodeId);
-      const node = allNodes?.find((n) => n.id === nodeId);
-      if (!node) return;
-
-      const children = await getChildren(session.id, nodeId);
-      if (children.length === 0) {
-        reset();
-      } else {
-        loadExisting(children);
-      }
     },
-    [session, activeNode?.id, allNodes, loadExisting, reset]
+    [session, activeNode?.id]
   );
 
   const handleNavigateParent = useCallback(async () => {
     if (!session || !activeNode || !activeNode.parentId) return;
     await setActiveNode(session.id, activeNode.parentId);
-    const children = await getChildren(session.id, activeNode.parentId);
-    if (children.length > 0) {
-      loadExisting(children);
-    } else {
-      reset();
-    }
-  }, [session, activeNode, loadExisting, reset]);
+  }, [session, activeNode]);
 
   useKeyboard({
-    divergeState,
+    divergeState: displayState,
     onSelectCard: handleSelectCard,
     onNavigateParent: handleNavigateParent,
     onReDiverge: handleReDiverge,
     onCancel: cancel,
   });
+
+  // allNodes resolves to [] quickly; if it's loaded but session is still undefined, session doesn't exist
+  if (!session && allNodes !== undefined) {
+    navigate('/', { replace: true });
+    return null;
+  }
 
   if (!session || !allNodes) {
     return (
@@ -121,7 +139,7 @@ export function ExplorationPage() {
   }
 
   if (!activeNode) {
-    navigate('/');
+    navigate('/', { replace: true });
     return null;
   }
 
@@ -135,7 +153,7 @@ export function ExplorationPage() {
       <ContentPanel
         session={session}
         activeNode={activeNode}
-        divergeState={divergeState}
+        divergeState={displayState}
         onSelectCard={handleSelectCard}
         onDiverge={handleDiverge}
         onReDiverge={handleReDiverge}

@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
-import type { Session, TreeNode, DivergeState, CandidateCardState, Angle } from '@/types';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import type { Session, TreeNode, DivergeState, CandidateCardState } from '@/types';
 import { generateAngles, generateResponse, compressContext } from '@/lib/ai';
 import { saveChildNode, updateNodeContext } from '@/lib/db';
 
@@ -19,6 +19,7 @@ const initialState: DivergeState = {
   phase: 'idle',
   cards: [0, 1, 2, 3].map(emptyCard),
   error: null,
+  parentNodeId: null,
 };
 
 export function useDiverge() {
@@ -50,6 +51,7 @@ export function useDiverge() {
         phase: 'preparing',
         cards: [0, 1, 2, 3].map(emptyCard),
         error: null,
+        parentNodeId: currentNode.id,
       });
 
       const currentContent = currentNode.response ?? currentNode.userQuestion!;
@@ -162,7 +164,7 @@ export function useDiverge() {
 
   // Load existing children as completed cards (for navigating to historical nodes)
   const loadExisting = useCallback(
-    (children: TreeNode[]) => {
+    (parentId: string, children: TreeNode[]) => {
       const cards: CandidateCardState[] = [0, 1, 2, 3].map((i) => {
         const child = children[i];
         if (!child) return emptyCard(i);
@@ -175,7 +177,7 @@ export function useDiverge() {
           error: null,
         };
       });
-      setState({ isRunning: false, phase: 'done', cards, error: null });
+      setState({ isRunning: false, phase: 'done', cards, error: null, parentNodeId: parentId });
     },
     []
   );
@@ -188,6 +190,13 @@ export function useDiverge() {
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     setState((prev) => ({ ...prev, isRunning: false, phase: 'idle' }));
+  }, []);
+
+  // Abort on unmount (e.g. navigating back to session list)
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
   }, []);
 
   return { state, diverge, cancel, loadExisting, reset };
