@@ -50,9 +50,14 @@ export function ExplorationPage() {
     async (finalNodeId: string) => {
       if (!session) return;
       await setActiveNode(session.id, finalNodeId);
-      reset();
+      const children = await getChildren(session.id, finalNodeId);
+      if (children.length > 0) {
+        loadExisting(children);
+      } else {
+        reset();
+      }
     },
-    [session, reset]
+    [session, reset, loadExisting]
   );
 
   const handleDiverge = useCallback(async () => {
