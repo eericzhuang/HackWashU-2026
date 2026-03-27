@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import type { DivergeState, CandidateCardState } from '@/types';
 import { db, setActiveNode, deleteChildren } from '@/lib/db';
 import { useDiverge } from '@/hooks/useDiverge';
+import { useFollowUp } from '@/hooks/useFollowUp';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import { AppShell } from '@/components/layout/AppShell';
 import { ContentPanel } from '@/components/content/ContentPanel';
@@ -39,6 +40,7 @@ export function ExplorationPage() {
   );
 
   const { state: divergeState, diverge, cancel } = useDiverge();
+  const { state: followUpState, ask: askFollowUp, cancel: cancelFollowUp } = useFollowUp();
 
   // Compute the effective display state:
   // - If the diverge is for the current active node → show live diverge state
@@ -49,6 +51,8 @@ export function ExplorationPage() {
     // Not diverging for this node — check DB children
     const children = allNodes.filter((n) => n.parentId === activeNode.id);
     if (children.length === 0) return idleState;
+    // Follow-up children (angle === null, not root) → show idle so user can diverge or ask more
+    if (children.length === 1 && children[0].angle === null && children[0].depth > 0) return idleState;
     const cards: CandidateCardState[] = [0, 1, 2, 3].map((i) => {
       const child = children[i];
       if (!child) return emptyCard(i);
@@ -90,6 +94,11 @@ export function ExplorationPage() {
     if (!session || !activeNode) return;
     diverge(session, activeNode, guidance);
   }, [session, activeNode, diverge]);
+
+  const handleFollowUp = useCallback(async (question: string) => {
+    if (!session || !activeNode) return;
+    askFollowUp(session, activeNode, question);
+  }, [session, activeNode, askFollowUp]);
 
   const handleReDiverge = useCallback(async () => {
     if (!session || !activeNode) return;
@@ -154,8 +163,11 @@ export function ExplorationPage() {
         session={session}
         activeNode={activeNode}
         divergeState={displayState}
+        followUpState={followUpState}
         onSelectCard={handleSelectCard}
         onDiverge={handleDiverge}
+        onFollowUp={handleFollowUp}
+        onCancelFollowUp={cancelFollowUp}
         onReDiverge={handleReDiverge}
         onCancel={cancel}
       />

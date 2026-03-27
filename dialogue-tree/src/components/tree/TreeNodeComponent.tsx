@@ -7,7 +7,7 @@ type TreeNodeComponentProps = NodeProps & { data: TreeRFNodeData };
 export const TreeNodeComponent = memo(function TreeNodeComponent({
   data,
 }: TreeNodeComponentProps) {
-  const { label, preview, isActive, isAncestor, depth } = data;
+  const { label, preview, isActive, isAncestor, isFollowUp, depth } = data;
 
   let borderClass = 'border-border';
   let bgClass = 'bg-foreground/5 dark:bg-background/80';
@@ -32,7 +32,7 @@ export const TreeNodeComponent = memo(function TreeNodeComponent({
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 !w-0 !h-0" />
 
       <p className={`text-xs font-medium ${textClass} truncate`}>
-        {depth === 0 ? 'Q' : label}
+        {depth === 0 ? 'Q' : isFollowUp ? `Q: ${label}` : label}
       </p>
       <p className="text-[10px] text-muted-foreground/50 truncate mt-0.5">
         {preview}

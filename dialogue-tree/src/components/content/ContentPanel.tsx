@@ -1,13 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import type { Session, TreeNode, DivergeState } from '@/types';
+import type { Session, TreeNode, DivergeState, FollowUpState } from '@/types';
 import { NodeContent } from '@/components/content/NodeContent';
 import { CandidateCard } from '@/components/content/CandidateCard';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork, ChevronDown, ChevronRight, Loader2, Send } from 'lucide-react';
 
 const EXPAND_COLORS = [
   { bg: 'bg-blue-500/8', text: 'text-blue-500 dark:text-blue-400', btnText: 'text-blue-400', border: 'border-blue-400/20', badge: 'bg-blue-500/12 text-blue-500 dark:text-blue-400' },
@@ -20,8 +20,11 @@ interface ContentPanelProps {
   session: Session;
   activeNode: TreeNode;
   divergeState: DivergeState;
+  followUpState: FollowUpState;
   onSelectCard: (finalNodeId: string) => void;
   onDiverge: (guidance?: string) => void;
+  onFollowUp: (question: string) => void;
+  onCancelFollowUp: () => void;
   onReDiverge: () => void;
   onCancel: () => void;
 }
@@ -29,8 +32,11 @@ interface ContentPanelProps {
 export function ContentPanel({
   activeNode,
   divergeState,
+  followUpState,
   onSelectCard,
   onDiverge,
+  onFollowUp,
+  onCancelFollowUp,
   onReDiverge,
   onCancel,
 }: ContentPanelProps) {
@@ -39,6 +45,7 @@ export function ContentPanel({
   const [showReDivergeConfirm, setShowReDivergeConfirm] = useState(false);
   const [showGuidance, setShowGuidance] = useState(false);
   const [guidance, setGuidance] = useState('');
+  const [followUpText, setFollowUpText] = useState('');
 
   const handleExpand = useCallback((index: number) => {
     setExpandedIndex(index);
@@ -89,7 +96,50 @@ export function ContentPanel({
     };
   }, []);
 
+  // Clear follow-up text when follow-up completes (activeNode changes)
+  useEffect(() => {
+    if (followUpState.phase === 'done' || followUpState.phase === 'idle') {
+      setFollowUpText('');
+    }
+  }, [followUpState.phase]);
+
   const isIdle = divergeState.phase === 'idle' && !divergeState.isRunning;
+  const isFollowUpActive = followUpState.phase === 'streaming';
+
+  // ===== Follow-up streaming view =====
+  if (isFollowUpActive) {
+    return (
+      <div key={`followup-${activeNode.id}`} className="h-full flex flex-col overflow-hidden animate-content-in">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="shrink-0 px-6 pt-5 pb-2">
+            <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+              <p className="text-sm text-foreground/80 italic">
+                {followUpState.parentNodeId === activeNode.id ? '' : '"'}
+                {/* Show the question from followUpText state */}
+                {followUpText || 'Follow-up question'}
+                {followUpState.parentNodeId === activeNode.id ? '' : '"'}
+              </p>
+            </div>
+          </div>
+          <ScrollArea className="flex-1 min-h-0">
+            <article className="px-6 pb-5 max-w-3xl">
+              <div className="prose dark:prose-invert prose-base max-w-none prose-headings:text-foreground prose-p:text-foreground/85 prose-strong:text-foreground prose-li:text-foreground/85 prose-a:text-primary prose-code:text-foreground/90 prose-code:bg-foreground/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-foreground/5 prose-pre:border prose-pre:border-foreground/10 [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:mt-8 [&>h2]:mb-4 [&>h2]:tracking-tight [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:my-4 [&>p]:leading-7 [&>ul]:my-4 [&>ul]:pl-6 [&>ol]:my-4 [&>ol]:pl-6 [&>li]:my-1.5 [&>li]:leading-7 [&>blockquote]:my-4 [&>blockquote]:pl-4 [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&_strong]:font-semibold [&>h2:first-child]:mt-0">
+                <ReactMarkdown>{followUpState.streamedText}</ReactMarkdown>
+              </div>
+            </article>
+          </ScrollArea>
+        </div>
+        <div className="shrink-0 border-t border-border bg-card/60 px-6 py-2 flex items-center gap-2">
+          <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Generating response...</span>
+          <Button variant="ghost" size="sm" className="ml-auto" onClick={onCancelFollowUp}>
+            <X className="w-4 h-4 mr-1" />
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // ===== Expanded response detail view =====
   if (expandedIndex !== null) {
@@ -134,14 +184,52 @@ export function ContentPanel({
     );
   }
 
-  // ===== Idle view: full response + Diverge button (leaf node) =====
+  // ===== Idle view: full response + follow-up input + Diverge button (leaf node) =====
   if (isIdle) {
+    const handleSendFollowUp = () => {
+      const q = followUpText.trim();
+      if (!q) return;
+      onFollowUp(q);
+      // Keep followUpText so streaming view can display it
+    };
+
     return (
       <div key={activeNode.id} className="h-full flex flex-col overflow-hidden animate-content-in">
         <div className="flex-1 min-h-0 overflow-hidden">
           <NodeContent node={activeNode} />
         </div>
         <div className="shrink-0 border-t border-border bg-card/60 px-6 py-3 space-y-2">
+          {/* Follow-up input */}
+          <div className="flex items-end gap-2">
+            <Textarea
+              placeholder="Ask a follow-up question..."
+              value={followUpText}
+              onChange={(e) => setFollowUpText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendFollowUp();
+                }
+              }}
+              className="min-h-[40px] max-h-[100px] text-sm flex-1"
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleSendFollowUp}
+              disabled={!followUpText.trim()}
+              className="shrink-0"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Diverge section */}
+          <div className="flex items-center gap-3 pt-1">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground/50">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
           <button
             type="button"
             onClick={() => setShowGuidance((v) => !v)}

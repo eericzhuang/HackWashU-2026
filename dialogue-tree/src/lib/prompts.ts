@@ -60,6 +60,35 @@ Current discussion: ${currentContent}${guidanceLine}
 Explore in depth from the "${angle.name}" angle: ${angle.rationale}`;
 }
 
+// ===== Follow-up Response =====
+
+export function followUpSystemPrompt(skill: string): string {
+  return `${skill ? skill + '\n\n' : ''}You are a thoughtful assistant continuing a conversation. The user has a follow-up question about the previous response. Answer it directly and thoroughly.
+
+Requirements:
+- Address the user's question specifically — do not repeat or summarize the previous response unless necessary
+- Use well-structured Markdown with clear hierarchy:
+  - Use ## for main sections if needed
+  - Use **bold** for key terms and concepts
+  - Use bullet lists or numbered lists for multiple points
+  - Use > blockquotes for key insights or takeaways
+- Be substantive and specific
+- Target 200-400 words
+- Write in the same language as the user's question`;
+}
+
+export function followUpUserPrompt(
+  context: string,
+  previousContent: string,
+  question: string
+): string {
+  return `Background context: ${context || '(Initial question)'}
+
+Previous response: ${previousContent}
+
+User's follow-up question: ${question}`;
+}
+
 // ===== Context Compression =====
 
 export function contextSystemPrompt(): string {

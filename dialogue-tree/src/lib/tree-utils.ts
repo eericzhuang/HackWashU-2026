@@ -42,6 +42,7 @@ export interface TreeRFNodeData {
   preview: string;
   isActive: boolean;
   isAncestor: boolean;
+  isFollowUp: boolean;
   depth: number;
   [key: string]: unknown;
 }
@@ -60,6 +61,7 @@ export function toReactFlowGraph(
     position: { x: 0, y: 0 },
     data: {
       label: getNodeLabel(node),
+      isFollowUp: node.angle === null && node.userQuestion !== null && node.depth > 0,
       preview: getNodeContent(node).slice(0, 15),
       isActive: node.id === activeNodeId,
       isAncestor: ancestorIds.has(node.id) && node.id !== activeNodeId,

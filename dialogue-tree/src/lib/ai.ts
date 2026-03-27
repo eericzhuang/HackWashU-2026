@@ -4,6 +4,8 @@ import {
   anglesUserPrompt,
   responseSystemPrompt,
   responseUserPrompt,
+  followUpSystemPrompt,
+  followUpUserPrompt,
   contextSystemPrompt,
   contextUserPrompt,
 } from '@/lib/prompts';
@@ -228,6 +230,22 @@ export async function generateResponse(
   await streamMessage(
     responseSystemPrompt(skill),
     responseUserPrompt(context, currentContent, angle, guidance),
+    callbacks,
+    signal
+  );
+}
+
+export async function generateFollowUp(
+  skill: string,
+  context: string,
+  previousContent: string,
+  question: string,
+  callbacks: StreamCallbacks,
+  signal?: AbortSignal
+): Promise<void> {
+  await streamMessage(
+    followUpSystemPrompt(skill),
+    followUpUserPrompt(context, previousContent, question),
     callbacks,
     signal
   );

@@ -72,3 +72,10 @@ export interface DivergeState {
   error: string | null;
   parentNodeId: string | null;    // Which node this diverge is running for
 }
+
+export interface FollowUpState {
+  phase: 'idle' | 'streaming' | 'done' | 'error';
+  streamedText: string;
+  error: string | null;
+  parentNodeId: string | null;
+}
