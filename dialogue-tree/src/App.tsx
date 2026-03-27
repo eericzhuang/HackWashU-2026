@@ -1,8 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import type { Session, TreeNode } from '@/types';
+import type { Session } from '@/types';
 import { db, createSession, setActiveNode, getChildren, deleteChildren } from '@/lib/db';
 import { useDiverge } from '@/hooks/useDiverge';
+import { AppShell } from '@/components/layout/AppShell';
 import { ContentPanel } from '@/components/content/ContentPanel';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,7 +36,6 @@ function App() {
     if (question.trim().length < 5) return;
     const s = await createSession(question.trim(), '');
     setSession(s);
-    // Get root node and trigger diverge
     const rootNode = await db.nodes.get(s.rootId);
     if (rootNode) {
       diverge(s, rootNode);
@@ -55,15 +55,35 @@ function App() {
     [liveSession, diverge]
   );
 
-  // Re-diverge
+  // Re-diverge: delete existing children, regenerate
   const handleReDiverge = useCallback(async () => {
     if (!liveSession || !activeNode) return;
     await deleteChildren(liveSession.id, activeNode.id);
     diverge(liveSession, activeNode);
   }, [liveSession, activeNode, diverge]);
 
-  // When jumping to existing child nodes, show history instead of regenerating
-  // (Will be implemented in Prompt 4)
+  // Node click from tree panel: navigate to that node
+  // Has children → show history (load existing children as cards)
+  // No children → trigger diverge
+  const handleNodeClick = useCallback(
+    async (nodeId: string) => {
+      if (!liveSession) return;
+      if (nodeId === activeNode?.id) return;
+
+      await setActiveNode(liveSession.id, nodeId);
+      const node = await db.nodes.get(nodeId);
+      if (!node) return;
+
+      const children = await getChildren(liveSession.id, nodeId);
+      if (children.length === 0) {
+        // No children yet — trigger diverge
+        diverge(liveSession, node);
+      }
+      // If children exist, useLiveQuery will update allNodes automatically
+      // and ContentPanel will show the existing children
+    },
+    [liveSession, activeNode?.id, diverge]
+  );
 
   // No session yet: show input screen
   if (!session) {
@@ -95,7 +115,7 @@ function App() {
   }
 
   // Waiting for data to load
-  if (!activeNode || !liveSession) {
+  if (!activeNode || !liveSession || !allNodes) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground">Loading...</p>
@@ -103,9 +123,13 @@ function App() {
     );
   }
 
-  // Exploration view
+  // Exploration view with tree panel
   return (
-    <div className="h-screen bg-background">
+    <AppShell
+      allNodes={allNodes}
+      activeNodeId={activeNode.id}
+      onNodeClick={handleNodeClick}
+    >
       <ContentPanel
         session={liveSession}
         activeNode={activeNode}
@@ -114,7 +138,7 @@ function App() {
         onReDiverge={handleReDiverge}
         onCancel={cancel}
       />
-    </div>
+    </AppShell>
   );
 }
 
