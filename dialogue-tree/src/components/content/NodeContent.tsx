@@ -26,7 +26,7 @@ export function NodeContent({ node }: NodeContentProps) {
 
   // Non-root node: fill available space, scroll internally
   return (
-    <div className="h-full flex flex-col overflow-hidden border-b border-border">
+    <div className="h-full flex flex-col overflow-hidden">
       <div className="shrink-0 px-6 pt-5 pb-2 flex items-baseline gap-3">
         <Badge variant="secondary" className="text-sm px-3 py-1 shrink-0">
           {node.angle}

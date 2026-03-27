@@ -8,30 +8,30 @@ import { Loader2 } from 'lucide-react';
 const CARD_COLORS = [
   {
     bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
+    text: 'text-blue-600 dark:text-blue-400',
     border: 'border-blue-500/30',
-    badge: 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/20',
+    badge: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20',
     hoverBorder: 'hover:border-blue-500/60',
   },
   {
     bg: 'bg-green-500/10',
-    text: 'text-green-400',
+    text: 'text-green-600 dark:text-green-400',
     border: 'border-green-500/30',
-    badge: 'bg-green-500/20 text-green-400 hover:bg-green-500/20',
+    badge: 'bg-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20',
     hoverBorder: 'hover:border-green-500/60',
   },
   {
     bg: 'bg-orange-500/10',
-    text: 'text-orange-400',
+    text: 'text-orange-600 dark:text-orange-400',
     border: 'border-orange-500/30',
-    badge: 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/20',
+    badge: 'bg-orange-500/20 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20',
     hoverBorder: 'hover:border-orange-500/60',
   },
   {
     bg: 'bg-purple-500/10',
-    text: 'text-purple-400',
+    text: 'text-purple-600 dark:text-purple-400',
     border: 'border-purple-500/30',
-    badge: 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/20',
+    badge: 'bg-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20',
     hoverBorder: 'hover:border-purple-500/60',
   },
 ] as const;

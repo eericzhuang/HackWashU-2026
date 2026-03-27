@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork, ChevronDown, ChevronRight } from 'lucide-react';
+import { RotateCcw, X, Eye, ArrowLeft, Check, GitFork, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 
 const EXPAND_COLORS = [
-  { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', badge: 'bg-blue-500/20 text-blue-400' },
-  { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/30', badge: 'bg-green-500/20 text-green-400' },
-  { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/30', badge: 'bg-orange-500/20 text-orange-400' },
-  { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30', badge: 'bg-purple-500/20 text-purple-400' },
+  { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/30', badge: 'bg-blue-500/20 text-blue-600 dark:text-blue-400' },
+  { bg: 'bg-green-500/10', text: 'text-green-600 dark:text-green-400', border: 'border-green-500/30', badge: 'bg-green-500/20 text-green-600 dark:text-green-400' },
+  { bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500/30', badge: 'bg-orange-500/20 text-orange-600 dark:text-orange-400' },
+  { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/30', badge: 'bg-purple-500/20 text-purple-600 dark:text-purple-400' },
 ] as const;
 
 interface ContentPanelProps {
@@ -205,6 +205,14 @@ export function ContentPanel({
         {/* Candidate cards — scrollable */}
         <ScrollArea className="flex-1 min-h-0">
           <div className="px-6 pt-4 pb-2">
+            {divergeState.isRunning && (
+              <div className="flex items-center gap-2 mb-3 text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                {divergeState.phase === 'preparing' && 'Preparing...'}
+                {divergeState.phase === 'angles' && 'Generating angles...'}
+                {divergeState.phase === 'responses' && 'Streaming responses...'}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               {divergeState.cards.map((card) => (
                 <CandidateCard
@@ -274,6 +282,11 @@ export function ContentPanel({
           {divergeState.phase === 'error' && divergeState.error && (
             <span className="text-destructive text-xs ml-auto">
               {divergeState.error}
+            </span>
+          )}
+          {divergeState.phase === 'done' && !showReDivergeConfirm && (
+            <span className="text-muted-foreground/50 text-xs ml-auto">
+              Press 1-4 to select · Backspace to go back · R to re-diverge
             </span>
           )}
         </div>

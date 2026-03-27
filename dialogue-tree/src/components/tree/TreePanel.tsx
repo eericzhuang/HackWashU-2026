@@ -4,6 +4,8 @@ import {
   ReactFlow,
   useReactFlow,
   ReactFlowProvider,
+  Background,
+  BackgroundVariant,
   type NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -109,7 +111,9 @@ function TreePanelInner({ session, allNodes, activeNodeId, onNodeClick }: TreePa
           panOnScroll
           zoomOnScroll={false}
           className="!bg-transparent"
-        />
+        >
+          <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+        </ReactFlow>
       </div>
 
       {/* Breadcrumb */}

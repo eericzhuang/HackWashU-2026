@@ -33,7 +33,7 @@ export function SessionList() {
   }, []);
 
   return (
-    <div className="h-screen bg-background flex flex-col">
+    <div className="h-screen min-w-[900px] bg-background flex flex-col">
       {/* Top bar */}
       <div className="shrink-0 px-6 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2.5">

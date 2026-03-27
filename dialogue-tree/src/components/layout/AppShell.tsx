@@ -49,7 +49,7 @@ export function AppShell({ session, allNodes, activeNodeId, onNodeClick, childre
   }, []);
 
   return (
-    <div ref={containerRef} className="h-screen flex bg-background">
+    <div ref={containerRef} className="h-screen min-w-[900px] flex bg-background">
       <div className="shrink-0 overflow-hidden" style={{ width: sidebarWidth }}>
         <TreePanel
           session={session}

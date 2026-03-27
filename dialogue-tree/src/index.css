@@ -209,6 +209,10 @@
 .dark .react-flow__edge.animated .react-flow__edge-path {
   stroke: oklch(0.6 0 0) !important;
 }
+/* Subtle dot grid for tree panel */
+.react-flow__background {
+  opacity: 0.4;
+}
 .react-flow__controls {
   display: none !important;
 }
