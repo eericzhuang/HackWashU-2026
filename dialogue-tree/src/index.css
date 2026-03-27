@@ -121,11 +121,97 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
-    }
+  }
+}
+
+/* Candidate card staggered slide-in */
+@keyframes card-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-in {
+  animation: card-slide-in 0.3s ease-out both;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 25%, oklch(0 0 0 / 5%) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+.dark .skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 25%, oklch(1 0 0 / 5%) 50%, transparent 75%);
+  background-size: 200% 100%;
+}
+
+/* Fade-in for streaming text chunks */
+@keyframes fade-in {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0 0 0 / 10%);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0 0 0 / 20%);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 10%);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(1 0 0 / 20%);
+}
+
+/* ReactFlow edge styling */
+.react-flow__edge-path {
+  stroke: oklch(0.8 0 0) !important;
+  stroke-width: 1.5 !important;
+}
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke: oklch(0.6 0 0) !important;
+  stroke-width: 2 !important;
+}
+.dark .react-flow__edge-path {
+  stroke: oklch(0.4 0 0) !important;
+}
+.dark .react-flow__edge.animated .react-flow__edge-path {
+  stroke: oklch(0.6 0 0) !important;
+}
+.react-flow__controls {
+  display: none !important;
+}
+.react-flow__minimap {
+  display: none !important;
 }

@@ -22,7 +22,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 const nodeTypes = { custom: TreeNodeComponent };
 
@@ -40,6 +41,7 @@ function TreePanelInner({ session, allNodes, activeNodeId, onNodeClick }: TreePa
   const prevActiveRef = useRef(activeNodeId);
   const [skillOpen, setSkillOpen] = useState(false);
   const [skillDraft, setSkillDraft] = useState(session.skill);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (nodes.length === 0) return;
@@ -77,6 +79,9 @@ function TreePanelInner({ session, allNodes, activeNodeId, onNodeClick }: TreePa
         <span className="flex-1 text-xs font-medium text-foreground truncate">
           {session.title}
         </span>
+        <Button variant="ghost" size="icon-sm" onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+          {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+        </Button>
         <Button
           variant="ghost"
           size="icon-sm"

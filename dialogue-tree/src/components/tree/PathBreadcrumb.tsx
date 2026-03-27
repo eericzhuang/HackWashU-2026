@@ -38,7 +38,7 @@ export function PathBreadcrumb({ path, onNavigate }: PathBreadcrumbProps) {
             {i > 0 && <ChevronRight className="w-3 h-3 shrink-0 opacity-40" />}
             <button
               onClick={() => onNavigate(item.id)}
-              className={`truncate max-w-[80px] hover:text-foreground transition-colors ${
+              className={`truncate max-w-[80px] hover:text-foreground transition-colors duration-150 rounded px-1 hover:bg-foreground/5 ${
                 isLast ? 'text-foreground font-medium' : ''
               }`}
               title={label}

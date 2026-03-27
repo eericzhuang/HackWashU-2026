@@ -107,7 +107,10 @@ export function ExplorationPage() {
   if (!session || !allNodes) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading session...</p>
+        </div>
       </div>
     );
   }

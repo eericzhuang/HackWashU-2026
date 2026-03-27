@@ -121,7 +121,7 @@ export function ContentPanel({
         <ScrollArea className="flex-1 min-h-0">
           <article className="max-w-3xl mx-auto py-2">
             <div className={`rounded-lg border ${colors.border} ${colors.bg} px-10 py-8`}>
-              <div className="prose prose-base max-w-none [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:mt-8 [&>h2]:mb-4 [&>h2]:tracking-tight [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:my-4 [&>p]:leading-7 [&>ul]:my-4 [&>ul]:pl-6 [&>ol]:my-4 [&>ol]:pl-6 [&>li]:my-1.5 [&>li]:leading-7 [&>blockquote]:my-4 [&>blockquote]:pl-4 [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&_strong]:font-semibold [&>h2:first-child]:mt-0">
+              <div className="prose dark:prose-invert prose-base max-w-none prose-headings:text-foreground prose-p:text-foreground/85 prose-strong:text-foreground prose-li:text-foreground/85 prose-a:text-primary prose-code:text-foreground/90 prose-code:bg-foreground/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-foreground/5 prose-pre:border prose-pre:border-foreground/10 [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:mt-8 [&>h2]:mb-4 [&>h2]:tracking-tight [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:my-4 [&>p]:leading-7 [&>ul]:my-4 [&>ul]:pl-6 [&>ol]:my-4 [&>ol]:pl-6 [&>li]:my-1.5 [&>li]:leading-7 [&>blockquote]:my-4 [&>blockquote]:pl-4 [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&_strong]:font-semibold [&>h2:first-child]:mt-0">
                 <ReactMarkdown>{card.streamedText}</ReactMarkdown>
               </div>
             </div>
@@ -138,9 +138,9 @@ export function ContentPanel({
         <div className="flex-1 min-h-0 overflow-hidden">
           <NodeContent node={activeNode} />
         </div>
-        <div className="shrink-0 px-6 py-3 border-t border-border flex items-center justify-center">
-          <Button onClick={onDiverge} size="sm">
-            <GitFork className="w-4 h-4 mr-1" />
+        <div className="shrink-0 px-6 py-4 border-t border-border flex items-center justify-center">
+          <Button onClick={onDiverge} size="sm" className="gap-1.5 shadow-sm hover:shadow-md transition-shadow">
+            <GitFork className="w-4 h-4" />
             Diverge from here
           </Button>
         </div>
@@ -166,9 +166,9 @@ export function ContentPanel({
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Context summary (collapsible) */}
         {showContext && activeNode.context && (
-          <div className="shrink-0 mx-6 mt-2 rounded-lg border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Context Summary</p>
-            <p>{activeNode.context}</p>
+          <div className="shrink-0 mx-6 mt-2 rounded-lg border border-foreground/10 bg-foreground/[0.03] p-3 text-xs text-muted-foreground">
+            <p className="font-medium mb-1 text-foreground/70">Context Summary</p>
+            <p className="leading-relaxed">{activeNode.context}</p>
           </div>
         )}
 
