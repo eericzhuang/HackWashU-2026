@@ -1,17 +1,18 @@
 import { type ReactNode, useState, useCallback, useRef, useEffect } from 'react';
-import type { TreeNode } from '@/types';
+import type { TreeNode, Session } from '@/types';
 import { TreePanel } from '@/components/tree/TreePanel';
 
 const MIN_WIDTH = 280;
 
 interface AppShellProps {
+  session: Session;
   allNodes: TreeNode[];
   activeNodeId: string;
   onNodeClick: (nodeId: string) => void;
   children: ReactNode;
 }
 
-export function AppShell({ allNodes, activeNodeId, onNodeClick, children }: AppShellProps) {
+export function AppShell({ session, allNodes, activeNodeId, onNodeClick, children }: AppShellProps) {
   const [sidebarWidth, setSidebarWidth] = useState(MIN_WIDTH);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -51,6 +52,7 @@ export function AppShell({ allNodes, activeNodeId, onNodeClick, children }: AppS
     <div ref={containerRef} className="h-screen flex bg-background">
       <div className="shrink-0 overflow-hidden" style={{ width: sidebarWidth }}>
         <TreePanel
+          session={session}
           allNodes={allNodes}
           activeNodeId={activeNodeId}
           onNodeClick={onNodeClick}

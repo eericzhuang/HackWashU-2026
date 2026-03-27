@@ -4,7 +4,6 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setActiveNode, getChildren, deleteChildren } from '@/lib/db';
 import { useDiverge } from '@/hooks/useDiverge';
 import { useKeyboard } from '@/hooks/useKeyboard';
-import { Header } from '@/components/layout/Header';
 import { AppShell } from '@/components/layout/AppShell';
 import { ContentPanel } from '@/components/content/ContentPanel';
 
@@ -119,25 +118,21 @@ export function ExplorationPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      <Header session={session} />
-      <div className="flex-1 min-h-0">
-        <AppShell
-          allNodes={allNodes}
-          activeNodeId={activeNode.id}
-          onNodeClick={handleNodeClick}
-        >
-          <ContentPanel
-            session={session}
-            activeNode={activeNode}
-            divergeState={divergeState}
-            onSelectCard={handleSelectCard}
-            onDiverge={handleDiverge}
-            onReDiverge={handleReDiverge}
-            onCancel={cancel}
-          />
-        </AppShell>
-      </div>
-    </div>
+    <AppShell
+      session={session}
+      allNodes={allNodes}
+      activeNodeId={activeNode.id}
+      onNodeClick={handleNodeClick}
+    >
+      <ContentPanel
+        session={session}
+        activeNode={activeNode}
+        divergeState={divergeState}
+        onSelectCard={handleSelectCard}
+        onDiverge={handleDiverge}
+        onReDiverge={handleReDiverge}
+        onCancel={cancel}
+      />
+    </AppShell>
   );
 }
