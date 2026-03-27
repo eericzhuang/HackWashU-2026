@@ -1,0 +1,160 @@
+import { useState, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import type { Session, TreeNode, DivergeState } from '@/types';
+import { NodeContent } from '@/components/content/NodeContent';
+import { CandidateCard } from '@/components/content/CandidateCard';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { RotateCcw, X, Eye, ArrowLeft, Check } from 'lucide-react';
+
+const EXPAND_COLORS = [
+  { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', badge: 'bg-blue-500/20 text-blue-400' },
+  { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/30', badge: 'bg-green-500/20 text-green-400' },
+  { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/30', badge: 'bg-orange-500/20 text-orange-400' },
+  { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30', badge: 'bg-purple-500/20 text-purple-400' },
+] as const;
+
+interface ContentPanelProps {
+  session: Session;
+  activeNode: TreeNode;
+  divergeState: DivergeState;
+  onSelectCard: (finalNodeId: string) => void;
+  onReDiverge: () => void;
+  onCancel: () => void;
+}
+
+export function ContentPanel({
+  activeNode,
+  divergeState,
+  onSelectCard,
+  onReDiverge,
+  onCancel,
+}: ContentPanelProps) {
+  const [showContext, setShowContext] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  const handleExpand = useCallback((index: number) => {
+    setExpandedIndex(index);
+  }, []);
+
+  const handleBack = useCallback(() => {
+    setExpandedIndex(null);
+  }, []);
+
+  const handleSelectFromExpanded = useCallback(
+    (finalNodeId: string) => {
+      setExpandedIndex(null);
+      onSelectCard(finalNodeId);
+    },
+    [onSelectCard]
+  );
+
+  // ===== Expanded response detail view =====
+  if (expandedIndex !== null) {
+    const card = divergeState.cards[expandedIndex];
+    const colors = EXPAND_COLORS[expandedIndex];
+
+    return (
+      <div className="h-full flex flex-col p-6 gap-4 overflow-hidden">
+        <div className="shrink-0 flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={handleBack}>
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back
+          </Button>
+          <Badge variant="secondary" className={`${colors.badge} text-sm px-3 py-1`}>
+            {card.angle?.name}
+          </Badge>
+          <span className="text-muted-foreground text-sm flex-1 truncate">
+            {card.angle?.rationale}
+          </span>
+          {card.status === 'complete' && card.finalNodeId && (
+            <Button
+              size="sm"
+              className={`${colors.text}`}
+              onClick={() => handleSelectFromExpanded(card.finalNodeId!)}
+            >
+              <Check className="w-4 h-4 mr-1" />
+              Select this direction
+            </Button>
+          )}
+        </div>
+
+        <ScrollArea className="flex-1 min-h-0">
+          <article className="max-w-3xl mx-auto py-2">
+            <div className={`rounded-lg border ${colors.border} ${colors.bg} px-10 py-8`}>
+              <div className="prose prose-base max-w-none [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:mt-8 [&>h2]:mb-4 [&>h2]:tracking-tight [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:my-4 [&>p]:leading-7 [&>ul]:my-4 [&>ul]:pl-6 [&>ol]:my-4 [&>ol]:pl-6 [&>li]:my-1.5 [&>li]:leading-7 [&>blockquote]:my-4 [&>blockquote]:pl-4 [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&_strong]:font-semibold [&>h2:first-child]:mt-0">
+                <ReactMarkdown>{card.streamedText}</ReactMarkdown>
+              </div>
+            </div>
+          </article>
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  // ===== Default view: NodeContent stretched on top + compact cards below =====
+  return (
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Top: current node content (fills most of the space) */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <NodeContent node={activeNode} />
+      </div>
+
+      {/* Context summary (collapsible) */}
+      {showContext && activeNode.context && (
+        <div className="shrink-0 mx-6 mt-2 rounded-lg border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+          <p className="font-medium mb-1">Context Summary</p>
+          <p>{activeNode.context}</p>
+        </div>
+      )}
+
+      {/* Bottom: 2x2 candidate cards (compact fixed height) */}
+      <div className="shrink-0 px-6 pt-4 pb-2">
+        <div className="grid grid-cols-2 gap-3">
+          {divergeState.cards.map((card) => (
+            <CandidateCard
+              key={card.index}
+              card={card}
+              onSelect={onSelectCard}
+              onExpand={handleExpand}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Action bar */}
+      <div className="shrink-0 px-6 py-2 border-t border-border flex items-center gap-2">
+        {divergeState.isRunning ? (
+          <Button variant="ghost" size="sm" onClick={onCancel}>
+            <X className="w-4 h-4 mr-1" />
+            Cancel
+          </Button>
+        ) : (
+          <>
+            <Button variant="ghost" size="sm" onClick={onReDiverge}>
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Re-diverge
+            </Button>
+            {activeNode.context && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowContext((v) => !v)}
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                {showContext ? 'Hide context' : 'View context'}
+              </Button>
+            )}
+          </>
+        )}
+
+        {divergeState.phase === 'error' && divergeState.error && (
+          <span className="text-destructive text-xs ml-auto">
+            {divergeState.error}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
