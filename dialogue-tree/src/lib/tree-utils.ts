@@ -35,6 +35,39 @@ export function getAncestorPath(
   return path;
 }
 
+// ==================== Export ====================
+
+export function exportPathAsMarkdown(
+  allNodes: TreeNode[],
+  activeNodeId: string,
+  sessionTitle: string
+): void {
+  const path = getAncestorPath(allNodes, activeNodeId);
+  const parts: string[] = [];
+
+  for (const node of path) {
+    if (node.depth === 0) {
+      parts.push(`# ${node.userQuestion}\n`);
+    } else if (node.angle === null && node.userQuestion) {
+      // Follow-up node
+      parts.push(`---\n\n## Follow-up: ${node.userQuestion}\n\n${node.response ?? ''}\n`);
+    } else {
+      // Diverge node
+      const rationale = node.rationale ? `> ${node.rationale}\n\n` : '';
+      parts.push(`---\n\n## Angle: ${node.angle}\n\n${rationale}${node.response ?? ''}\n`);
+    }
+  }
+
+  const markdown = parts.join('\n');
+  const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${sessionTitle.replace(/[<>:"/\\|?*]/g, '_')}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ==================== ReactFlow Conversion ====================
 
 export interface TreeRFNodeData {

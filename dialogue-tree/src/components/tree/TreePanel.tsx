@@ -11,7 +11,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import type { TreeNode, Session } from '@/types';
 import { db } from '@/lib/db';
-import { getAncestorPath } from '@/lib/tree-utils';
+import { getAncestorPath, exportPathAsMarkdown } from '@/lib/tree-utils';
 import { useTreeLayout } from '@/hooks/useTreeLayout';
 import { TreeNodeComponent } from '@/components/tree/TreeNodeComponent';
 import { PathBreadcrumb } from '@/components/tree/PathBreadcrumb';
@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Settings, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Settings, Sun, Moon, Download } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 const nodeTypes = { custom: TreeNodeComponent };
@@ -82,6 +82,14 @@ function TreePanelInner({ session, allNodes, activeNodeId, onNodeClick }: TreePa
         <span className="flex-1 text-xs font-medium text-foreground truncate">
           {session.title}
         </span>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => exportPathAsMarkdown(allNodes, activeNodeId, session.title)}
+          title="Export current path as Markdown"
+        >
+          <Download className="w-3.5 h-3.5" />
+        </Button>
         <Button variant="ghost" size="icon-sm" onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
           {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
         </Button>
