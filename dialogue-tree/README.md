@@ -1,73 +1,134 @@
-# React + TypeScript + Vite
+# Dialogue Divergence Tree
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local-first web app for tree-structured AI conversation exploration. Ask a question, AI generates 4 divergent angles with full responses, pick one, and repeat — building a tree of ideas. You can also ask follow-up questions at any point for linear deep-dives.
 
-Currently, two official plugins are available:
+Built for HackWashU 2026.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+React 18 + TypeScript + Vite, Tailwind CSS + shadcn/ui, Dexie.js (IndexedDB), @xyflow/react (tree visualization), Anthropic API (or any OpenAI-compatible provider).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Setup
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- [Node.js](https://nodejs.org/) v18+
+- An API key from one of: Anthropic, OpenRouter, Groq, or a local Ollama instance
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd dialogue-tree
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Configure API Key
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copy the example env file and fill in your API key:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
+```
+
+Edit `.env` — pick one provider and uncomment/fill in the relevant lines:
+
+**Option A: Anthropic (recommended)**
+```env
+LLM_PROVIDER=anthropic
+VITE_LLM_PROVIDER=anthropic
+LLM_API_KEY=sk-ant-your-key-here
+LLM_BASE_URL=https://api.anthropic.com
+VITE_LLM_MODEL=claude-sonnet-4-20250514
+```
+
+**Option B: OpenRouter**
+```env
+LLM_PROVIDER=openai
+VITE_LLM_PROVIDER=openai
+LLM_API_KEY=sk-or-your-key-here
+LLM_BASE_URL=https://openrouter.ai/api
+VITE_LLM_MODEL=anthropic/claude-sonnet-4-20250514
+```
+
+**Option C: Groq (free tier)**
+```env
+LLM_PROVIDER=openai
+VITE_LLM_PROVIDER=openai
+LLM_API_KEY=gsk_your-key-here
+LLM_BASE_URL=https://api.groq.com/openai
+VITE_LLM_MODEL=llama-3.3-70b-versatile
+```
+
+**Option D: Local Ollama (no API key needed)**
+```env
+LLM_PROVIDER=openai
+VITE_LLM_PROVIDER=openai
+LLM_API_KEY=ollama
+LLM_BASE_URL=http://localhost:11434
+VITE_LLM_MODEL=qwen2.5:14b
+```
+
+> The API key never leaves your machine. Vite's dev server proxies all requests to the LLM provider, injecting the key server-side.
+
+### Run
+
+```bash
+npm run dev
+```
+
+Open http://localhost:5173 in your browser.
+
+## How It Works
+
+1. **Create an exploration** — type a question to start
+2. **Diverge** — AI generates 4 different angles, each with a full response. Cards stream in parallel.
+3. **Pick a direction** — click a card to expand the full response, then select it to go deeper
+4. **Repeat** — from any node, diverge again into 4 new angles
+5. **Follow up** — instead of diverging, type a follow-up question for a focused linear response
+6. **Navigate** — click any node in the tree to jump to it. The tree preserves all branches.
+
+### The Tree
+
+The left panel shows your exploration as a tree. The root is your initial question, branches are diverge directions, and linear nodes marked `Q:` are follow-ups. Click any node to view its content. The active node is highlighted in blue.
+
+### Background / Skill
+
+Click the gear icon to set a "Background / Skill" prompt — this is prepended to all AI calls to tailor responses (e.g., "I'm a graduate student in economics" or "Explain things simply with analogies").
+
+### Per-Diverge Guidance
+
+Before diverging, expand "Steer this divergence" to add optional guidance that applies only to that specific diverge (e.g., "Focus on practical applications" or "Challenge this assumption").
+
+### Export
+
+Click the download icon in the tree panel to export the current path (root to active node) as a Markdown file.
+
+## Keyboard Shortcuts
+
+These shortcuts work when no input field is focused:
+
+| Key | Action |
+|-----|--------|
+| `1` `2` `3` `4` | Select the corresponding card (when cards are complete) |
+| `Backspace` | Navigate to parent node |
+| `R` | Re-diverge from current node |
+| `Escape` | Cancel a running diverge |
+
+## Data Storage
+
+All data is stored locally in your browser via IndexedDB (Dexie.js). Nothing is sent to any server other than the LLM API calls. Clearing browser data will delete all sessions.
+
+## Project Structure
+
+```
+src/
+  components/
+    content/       # ContentPanel, CandidateCard, NodeContent
+    layout/        # AppShell, Header
+    session/       # SessionList, NewSessionDialog
+    tree/          # TreePanel, TreeNodeComponent, PathBreadcrumb
+    ui/            # shadcn/ui components
+  hooks/           # useDiverge, useFollowUp, useKeyboard, useTheme, useTreeLayout
+  lib/             # ai.ts, db.ts, prompts.ts, tree-utils.ts
+  pages/           # ExplorationPage
 ```
