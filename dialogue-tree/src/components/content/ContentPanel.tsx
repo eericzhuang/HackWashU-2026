@@ -33,6 +33,7 @@ export function ContentPanel({
 }: ContentPanelProps) {
   const [showContext, setShowContext] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [showReDivergeConfirm, setShowReDivergeConfirm] = useState(false);
 
   const handleExpand = useCallback((index: number) => {
     setExpandedIndex(index);
@@ -132,19 +133,46 @@ export function ContentPanel({
           </Button>
         ) : (
           <>
-            <Button variant="ghost" size="sm" onClick={onReDiverge}>
-              <RotateCcw className="w-4 h-4 mr-1" />
-              Re-diverge
-            </Button>
-            {activeNode.context && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowContext((v) => !v)}
-              >
-                <Eye className="w-4 h-4 mr-1" />
-                {showContext ? 'Hide context' : 'View context'}
-              </Button>
+            {showReDivergeConfirm ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  This will delete all child nodes. Re-diverge?
+                </span>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setShowReDivergeConfirm(false);
+                    onReDiverge();
+                  }}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowReDivergeConfirm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setShowReDivergeConfirm(true)}>
+                  <RotateCcw className="w-4 h-4 mr-1" />
+                  Re-diverge
+                </Button>
+                {activeNode.context && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowContext((v) => !v)}
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    {showContext ? 'Hide context' : 'View context'}
+                  </Button>
+                )}
+              </>
             )}
           </>
         )}

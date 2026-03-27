@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import type { Session, TreeNode, DivergeState, CandidateCardState } from '@/types';
+import type { Session, TreeNode, DivergeState, CandidateCardState, Angle } from '@/types';
 import { generateAngles, generateResponse, compressContext } from '@/lib/ai';
 import { saveChildNode, updateNodeContext } from '@/lib/db';
 
@@ -158,10 +158,30 @@ export function useDiverge() {
     [setCardState]
   );
 
+  // Load existing children as completed cards (for navigating to historical nodes)
+  const loadExisting = useCallback(
+    (children: TreeNode[]) => {
+      const cards: CandidateCardState[] = [0, 1, 2, 3].map((i) => {
+        const child = children[i];
+        if (!child) return emptyCard(i);
+        return {
+          index: i,
+          status: 'complete' as const,
+          angle: { name: child.angle ?? '', rationale: child.rationale ?? '' },
+          streamedText: child.response ?? '',
+          finalNodeId: child.id,
+          error: null,
+        };
+      });
+      setState({ isRunning: false, phase: 'done', cards, error: null });
+    },
+    []
+  );
+
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     setState((prev) => ({ ...prev, isRunning: false, phase: 'idle' }));
   }, []);
 
-  return { state, diverge, cancel };
+  return { state, diverge, cancel, loadExisting };
 }

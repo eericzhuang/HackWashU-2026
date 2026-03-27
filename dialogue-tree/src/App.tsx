@@ -29,7 +29,7 @@ function App() {
     (n) => n.id === (liveSession?.activeNodeId ?? session?.activeNodeId)
   );
 
-  const { state: divergeState, diverge, cancel } = useDiverge();
+  const { state: divergeState, diverge, cancel, loadExisting } = useDiverge();
 
   // Create session and auto-trigger the first diverge
   const handleStart = useCallback(async () => {
@@ -63,8 +63,6 @@ function App() {
   }, [liveSession, activeNode, diverge]);
 
   // Node click from tree panel: navigate to that node
-  // Has children → show history (load existing children as cards)
-  // No children → trigger diverge
   const handleNodeClick = useCallback(
     async (nodeId: string) => {
       if (!liveSession) return;
@@ -76,13 +74,13 @@ function App() {
 
       const children = await getChildren(liveSession.id, nodeId);
       if (children.length === 0) {
-        // No children yet — trigger diverge
         diverge(liveSession, node);
+      } else {
+        // Load existing children as completed cards
+        loadExisting(children);
       }
-      // If children exist, useLiveQuery will update allNodes automatically
-      // and ContentPanel will show the existing children
     },
-    [liveSession, activeNode?.id, diverge]
+    [liveSession, activeNode?.id, diverge, loadExisting]
   );
 
   // No session yet: show input screen
