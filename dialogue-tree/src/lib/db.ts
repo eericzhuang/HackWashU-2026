@@ -124,6 +124,13 @@ export async function deleteChildren(
   }
 }
 
+export async function deleteSession(sessionId: string): Promise<void> {
+  await db.transaction('rw', db.sessions, db.nodes, async () => {
+    await db.nodes.where({ sessionId }).delete();
+    await db.sessions.delete(sessionId);
+  });
+}
+
 export async function updateNodeContext(
   nodeId: string,
   context: string
