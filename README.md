@@ -72,6 +72,10 @@ VITE_LLM_MODEL=qwen2.5:14b
 
 ### Run
 
+run start.bat
+
+OR
+
 ```bash
 npm run dev
 ```
