@@ -18,7 +18,7 @@ React 18 + TypeScript + Vite, Tailwind CSS + shadcn/ui, Dexie.js (IndexedDB), @x
 ### Install
 
 ```bash
-git clone https://github.com/your-username/HackWashU-2026.git
+git clone https://github.com/eericzhuang/HackWashU-2026.git
 cd HackWashU-2026/dialogue-tree
 npm install
 ```
@@ -72,6 +72,10 @@ VITE_LLM_MODEL=qwen2.5:14b
 > The API key never leaves your machine. Vite's dev server proxies all requests to the LLM provider, injecting the key server-side.
 
 ### Run
+
+run start.bat
+
+OR
 
 ```bash
 npm run dev
