@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/llm/:path*", "destination": "/api/llm/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
