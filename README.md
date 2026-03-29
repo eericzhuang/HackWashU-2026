@@ -18,7 +18,8 @@ React 18 + TypeScript + Vite, Tailwind CSS + shadcn/ui, Dexie.js (IndexedDB), @x
 ### Install
 
 ```bash
-cd dialogue-tree
+git clone https://github.com/your-username/HackWashU-2026.git
+cd HackWashU-2026/dialogue-tree
 npm install
 ```
 
